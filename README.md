@@ -11,7 +11,7 @@ Node.js, Express, PostgreSQL (Neon), JWT e bcrypt.
 ## Como rodar
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/Luilu-star/SisEve-Back
 cd SisEve-Back
 npm install
 npm start
