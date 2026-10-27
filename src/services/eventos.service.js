@@ -1,7 +1,7 @@
 const repo = require('../repositories/eventos.repository');
 const AppError = require('../helpers/AppError');
 
-exports.listar = () => repo.listar();
+exports.listar = async () => await repo.listar();
 
 exports.obter = async (id) => {
   const evento = await repo.buscarPorId(id);
