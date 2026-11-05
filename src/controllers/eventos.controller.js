@@ -2,7 +2,7 @@ const service = require('../services/eventos.service');
 const asyncHandler = require('../helpers/asyncHandler');
 
 exports.listar = asyncHandler(async (req, res) => {
-  res.json(await service.listar());
+  res.json(await service.listar(req.query));
 });
 
 exports.obter = asyncHandler(async (req, res) => {
@@ -10,9 +10,13 @@ exports.obter = asyncHandler(async (req, res) => {
 });
 
 exports.criar = asyncHandler(async (req, res) => {
-  res.status(201).json(await service.criar(req.body));
+  res.status(201).json(await service.criar(req.body, req.usuario?.id));
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  res.status(200).json(await service.update(req.params.id, req.body));
+  res.status(200).json(await service.update(req.params.id, req.body, req.usuario?.id));
+});
+
+exports.excluir = asyncHandler(async (req, res) => {
+  res.status(200).json(await service.excluir(req.params.id));
 });

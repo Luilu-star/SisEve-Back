@@ -1,15 +1,13 @@
 const router = require('express').Router();
 const c = require('../controllers/auth.controller');
-const validate = require('../middlewares/validate')
-const schemas = require('../validators/auth.schema')
+const auth = require('../middlewares/auth.middleware');
 
-
-router.get('/', c.listar);
-router.get('/active', c.listarA);
-router.get('/buscar', c.buscaE);
-router.get('/verify', c.auth)
-router.get('/:id', c.buscaID);  
-router.post('/register', validate(schemas.registerSchema), c.registrar);
+router.post('/register', c.registrar);
+router.post('/login', c.login);
+router.get('/me', auth(), c.me);
+router.get('/', auth(['admin']), c.listar);
+router.get('/active', auth(['admin', 'organizador']), c.listarA);
+router.get('/buscar', auth(['admin']), c.buscaE);
+router.get('/:id', auth(), c.buscaID);
 
 module.exports = router;
-
