@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const repo = require('../repositories/usuarios.repository');
 const AppError = require('../helpers/AppError');
 
@@ -7,41 +6,57 @@ exports.listar = async () => await repo.listar();
 exports.listarAtivos = async () => await repo.listarAtivos();
 
 exports.buscaEmail = async (email) => {
-  if (!email) throw new AppError('E-mail não informado', 400);
   const user = await repo.buscaPorEmail(email);
-  if (!user) throw new AppError('Usuário não encontrado', 404);
-  delete user.senha;
-  return user;
+  if (!user) {
+    throw new AppError('Usuario nao encontrado com o e-mail informado', 404);
+  }
+  const { senha, ...userSemSenha } = user;
+  return userSemSenha;
 };
 
 exports.buscaID = async (id) => {
   const user = await repo.buscaPorID(id);
-  if (!user) throw new AppError('Usuário não encontrado', 404);
+  if (!user) {
+    throw new AppError('Usuario nao encontrado com o ID informado', 404);
+  }
   return user;
 };
 
 exports.registrar = async (dados) => {
-  if (!dados.nome || !dados.email || !dados.senha || !dados.cpf) {
-    throw new AppError('Campos obrigatórios: nome, email, senha e cpf', 400);
+  const emailExistente = await repo.buscaPorEmail(dados.email);
+  if (emailExistente) {
+    throw new AppError('E-mail ja cadastrado', 409);
   }
+
+  const cpfExistente = await repo.buscaPorCPF(dados.cpf);
+  if (cpfExistente) {
+    throw new AppError('CPF ja cadastrado', 409);
+  }
+
   return await repo.registrar(dados);
 };
 
 exports.login = async ({ email, senha }) => {
-  if (!email || !senha) throw new AppError('Informe e-mail e senha', 400);
-
   const user = await repo.buscaPorEmail(email);
-  if (!user) throw new AppError('Credenciais inválidas', 401);
-  if (!user.isActive) throw new AppError('Usuário desativado. Contate o suporte.', 403);
 
-  const bateu = await bcrypt.compare(senha, user.senha);
-  if (!bateu) throw new AppError('Credenciais inválidas', 401);
+  if (!user) {
+    throw new AppError('Credenciais invalidas', 401);
+  }
+
+  if (!user.isActive) {
+    throw new AppError('Conta inativa. Contate o administrador', 403);
+  }
+
+  const senhaCorreta = await repo.autenticaSenha(email, senha);
+  if (!senhaCorreta) {
+    throw new AppError('Credenciais invalidas', 401);
+  }
 
   const payload = {
     id: user.id,
     nome: user.nome,
     email: user.email,
-    role: user.role
+    role: (user.desc || '').toLowerCase()
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -49,14 +64,16 @@ exports.login = async ({ email, senha }) => {
   });
 
   return {
-    mensagem: 'Login realizado com sucesso',
+    mensagem: 'Login efetuado com sucesso',
     token,
     usuario: payload
   };
 };
 
-exports.me = async (id) => {
+exports.obterPerfilLogado = async (id) => {
   const user = await repo.buscaPorID(id);
-  if (!user) throw new AppError('Usuário não encontrado', 404);
+  if (!user) {
+    throw new AppError('Usuario nao encontrado', 404);
+  }
   return user;
 };
