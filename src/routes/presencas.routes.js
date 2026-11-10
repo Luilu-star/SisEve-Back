@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const c = require('../controllers/presencas.controller');
-const auth = require('../middlewares/auth.middleware');
+const { authenticate, authorize } = require('../middlewares/auth.middleware');
 
-router.post('/', auth(['organizador', 'admin']), c.registrar);
-router.get('/', auth(['organizador', 'admin']), c.listar);
+router.post('/', authenticate, authorize('organizador', 'admin'), c.registrar);
+router.get('/', authenticate, authorize('organizador', 'admin'), c.listar);
 
 module.exports = router;
