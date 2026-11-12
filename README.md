@@ -125,19 +125,15 @@ CORS_ORIGIN=http://localhost:8081
 | `ADMIN_CODE` | Código exigido no cadastro de administradores. |
 | `CORS_ORIGIN` | Origens autorizadas a acessar a API. |
 
-Não compartilhe o arquivo `.env` nem envie credenciais para o repositório.
-
 ## Banco de dados
 
-O SisEve utiliza PostgreSQL para armazenar os dados da aplicação.
+O SisEve utiliza PostgreSQL para armazenamento dos dados.
 
 A conexão é configurada em:
 
 ```text
 src/config/db.js
 ```
-
-O projeto utiliza a biblioteca `pg` para executar consultas parametrizadas.
 
 A estrutura do banco deve ser criada previamente. As tabelas utilizadas pela aplicação incluem:
 
